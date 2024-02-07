@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/app_bar_main">
+
+    <ImageButton
+        android:id="@+id/exit_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/exit"
+        app:srcCompat="@drawable/close_app"
+        android:background="@color/white"/>
+
+    <Button
+        android:id="@+id/return_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/custom_return_button"
+        android:layout_alignTop="@+id/exit_btn"
+        android:textColor="@color/white"
+        android:text="@string/ret" />
+
+    <com.example.my_application.TiredImageView
+        android:id="@+id/tiredImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/return_btn"
+        android:layout_marginTop="30dp"
+        android:layout_centerInParent="true" />
+
+    <SeekBar
+        android:id="@+id/fatigueSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:max="100"
+        android:layout_below="@+id/tiredImageView"/>
+
+    <TextView
+        android:id="@+id/fatigueValueTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fatigueSeekBar"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:text="100" />
+
+    <TextView
+        android:id="@+id/text_of_entries"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fatigueValueTextView"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="27dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="25dp"
+        android:text="@string/num_of_entries"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/num_of_entries"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_toEndOf="@+id/text_of_entries"
+        android:layout_alignTop="@+id/text_of_entries"/>
+
+    <Button
+        android:id="@+id/rating_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_add_button"
+        android:contentDescription="add"
+        android:text="+"
+        android:textColor="@android:color/white"
+        android:textSize="50sp"
+        android:layout_below="@+id/text_of_entries"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"/>
+
+</RelativeLayout>

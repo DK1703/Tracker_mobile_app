@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/sign_in"
+        android:layout_width="284dp"
+        android:layout_height="59dp"
+        android:text="@string/sign_in"
+
+        android:background="@drawable/custom_save_entry_button"
+        android:transitionName="sign_in_transition"
+        tools:layout_editor_absoluteX="63dp"
+        tools:layout_editor_absoluteY="542dp" />
+
+    <Button
+        android:id="@+id/register"
+        android:layout_width="284dp"
+        android:layout_height="59dp"
+        android:background="@drawable/custom_save_entry_button"
+        android:text="@string/register"
+        android:transitionName="register_transition"
+        tools:layout_editor_absoluteX="63dp"
+        tools:layout_editor_absoluteY="623dp" />
+
+    <Button
+        android:id="@+id/language"
+        android:layout_width="284dp"
+        android:layout_height="59dp"
+        android:layout_marginTop="210dp"
+        android:background="@drawable/custom_language_button"
+        android:text="@string/select_language"
+        app:layout_constraintTop_toBottomOf="@+id/cont" />
+
+<!--    <Button-->
+<!--        android:id="@+id/btn_cont"-->
+<!--        android:layout_width="284dp"-->
+<!--        android:layout_height="59dp"-->
+<!--        android:background="@drawable/custom_language_button"-->
+<!--        android:text="@string/cont" />-->
+
+</LinearLayout>

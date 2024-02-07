@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/return_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/vlevo"
+        android:background="@color/white"
+        app:srcCompat="@drawable/strelka_vlevo" />
+
+    <ImageView
+        android:id="@+id/sad_smile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/return_btn"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="82dp"
+        app:srcCompat="@drawable/sad_smile"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/your_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sad_smile"
+        android:gravity="center"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="25dp"
+        android:text="@string/your_status_unsub"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/buy_sub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_save_entry_button"
+        android:text="@string/buy_sub"
+        android:layout_below="@+id/your_status"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="25dp"
+        />
+
+
+
+</RelativeLayout>

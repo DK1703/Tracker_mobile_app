@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="colorPrimaryDark">#BF007A</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#BF007A</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="telega">#00B2FF</color>
+</resources>

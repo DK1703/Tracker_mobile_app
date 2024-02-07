@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/setting_icon"
+        android:icon="@drawable/setting_icon"
+        android:title="@string/settings"
+        app:iconTint="@android:color/white"
+        />
+
+    <item
+        android:id="@+id/acc_status"
+        android:icon="@drawable/account_status"
+        android:title="@string/acc_status"
+        app:iconTint="@android:color/white"
+        />
+    <item
+        android:id="@+id/history"
+        android:icon="@drawable/history"
+        android:title="@string/history"
+        app:iconTint="@android:color/white"
+        />
+    <item
+        android:id="@+id/logout"
+        android:icon="@drawable/logout"
+        android:title="@string/logout"
+        app:iconTint="@android:color/white"
+        />
+</menu>
