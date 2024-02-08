@@ -102,7 +102,7 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
 
         loadProfileImageFromFirebaseStorage();
 
-        setDailyNotification();
+//        setDailyNotification();
 
         Button return_btn= findViewById(R.id.return_btn);
         return_btn.setOnClickListener(new View.OnClickListener() {
@@ -183,8 +183,11 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();
 
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = user.getUid();
         // Создайте ссылку на файл с изображением профиля в Firebase Storage
-        String fileName = "profile_image.jpg"; // Имя файла, которое вы использовали для сохранения изображения
+        String fileName = userId + "_profile_image.jpg";// Имя файла, которое вы использовали для сохранения изображения
         StorageReference profileImageRef = storageRef.child("profile_images/" + fileName);
 
         // Загрузите изображение из Firebase Storage в виде URL

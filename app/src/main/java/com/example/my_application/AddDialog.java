@@ -2,10 +2,21 @@ package com.example.my_application;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +27,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,32 +37,35 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
-
+import java.util.UUID;
 
 public class AddDialog extends AppCompatDialogFragment {
-
     private OnCounterUpdateListener onCounterUpdateListener;
-
     public void setOnCounterUpdateListener(OnCounterUpdateListener listener) {
         this.onCounterUpdateListener = listener;
     }
-
+    private SpeechRecognizer speechRecognizer;
+    private Intent speechRecognizerIntent;
     private TextView clockTextView;
     private final Handler handler = new Handler();
-
     private EditText activ_text;
     private EditText descr_text;
-
     private int num_of_Entries_counter;
 
     public void setCurrentCounterValue(int currentCounterValue) {
         this.num_of_Entries_counter = currentCounterValue;
     }
+    private Button voiceButtonForDescription;
 
     @NonNull
     @Override
@@ -76,14 +92,70 @@ public class AddDialog extends AppCompatDialogFragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getActivity());
+        speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
+// Установите слушатель для обработки результатов распознавания речи
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                // Вызывается, когда приложение готово к началу записи речи
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+                // Вызывается в начале записи речи
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+                // Вызывается, когда уровень аудиосигнала изменился
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+                // Вызывается при получении звукового буфера
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+                // Вызывается в конце записи речи
+            }
+
+            @Override
+            public void onError(int error) {
+                // Вызывается при возникновении ошибки распознавания речи
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                // Вызывается при получении результатов распознавания речи
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null && !matches.isEmpty()) {
+                    // Обновите поле описания с распознанным текстом
+                    String recognizedText = matches.get(0);
+                    descr_text.setText(recognizedText);
+                }
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+                // Вызывается при получении частичных результатов распознавания речи
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+                // Вызывается при получении события распознавания речи
             }
         });
 
         clockTextView = view.findViewById(R.id.clockTextView);
         activ_text = view.findViewById(R.id.activity);
         descr_text = view.findViewById(R.id.description);
+
 //        TextView num_of_Entries = view.findViewById(R.id.num_of_entries);
 //        num_of_Entries.setText(String.valueOf(num_of_Entries_counter));
 
@@ -105,6 +177,14 @@ public class AddDialog extends AppCompatDialogFragment {
             @Override
             public void onClick(View v) {
                 dismiss();
+            }
+        });
+
+        voiceButtonForDescription = view.findViewById(R.id.btn_voice_for_description);
+        voiceButtonForDescription.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                speechRecognizer.startListening(speechRecognizerIntent);
             }
         });
 
@@ -190,5 +270,3 @@ public class AddDialog extends AppCompatDialogFragment {
         super.onDestroy();
     }
 }
-
-

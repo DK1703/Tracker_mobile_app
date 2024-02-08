@@ -80,6 +80,17 @@
         android:autofillHints=""
         android:inputType="text"/>
 
+    <Button
+        android:id="@+id/btn_voice_for_description"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:padding="6dp"
+        android:background="@drawable/custom_voice_button"
+        android:layout_alignTop="@+id/description"
+        android:drawableStart="@drawable/microphone"
+        android:backgroundTint="@color/white"
+        android:layout_alignParentEnd="true"/>
+
     <TextView
         android:id="@+id/text_of_entries"
         android:layout_width="wrap_content"
@@ -109,6 +120,7 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="50dp"
         />
+
 
 
 </RelativeLayout>

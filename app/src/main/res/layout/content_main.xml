@@ -78,13 +78,13 @@
         android:id="@+id/rating_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/text_of_entries"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
         android:background="@drawable/custom_add_button"
         android:contentDescription="add"
         android:text="+"
         android:textColor="@android:color/white"
-        android:textSize="50sp"
-        android:layout_below="@+id/text_of_entries"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="20dp"/>
+        android:textSize="50sp" />
 
 </RelativeLayout>

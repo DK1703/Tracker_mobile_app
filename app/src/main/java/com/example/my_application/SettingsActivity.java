@@ -52,7 +52,11 @@ public class SettingsActivity extends AppCompatActivity {
         Button return_btn = findViewById(R.id.return_btn);
         user_profile_name = findViewById(R.id.user_profile_name);
         user_profile_photo = findViewById(R.id.user_profile_image);
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images").child("profile_image.jpg");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = user.getUid();
+        // Создайте ссылку на файл с изображением профиля в Firebase Storage
+        String fileName = userId + "_profile_image.jpg";// Имя файла, которое вы использовали для сохранения изображения
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images").child(fileName);
         storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
              @Override
              public void onSuccess(Uri uri) {
@@ -61,10 +65,10 @@ public class SettingsActivity extends AppCompatActivity {
              }
          });
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userId = user.getUid();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("Name");
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseUser user_name = FirebaseAuth.getInstance().getCurrentUser();
+        String userId_name = user_name.getUid();
+        DatabaseReference databaseReference_name = FirebaseDatabase.getInstance().getReference("Users").child(userId_name).child("Name");
+        databaseReference_name.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -180,7 +184,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void updateProfileImage(Uri imageUri) {
         // Сохраните URI изображения в Firebase Storage
-        StorageReference imageRef = FirebaseStorage.getInstance().getReference().child("profile_images").child("profile_image.jpg");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = user.getUid();
+        // Создайте ссылку на файл с изображением профиля в Firebase Storage
+        String fileName = userId+ "_profile_image.jpg";// Имя файла, которое вы использовали для сохранения изображения
+        StorageReference imageRef = FirebaseStorage.getInstance().getReference().child("profile_images").child(fileName);
         imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
