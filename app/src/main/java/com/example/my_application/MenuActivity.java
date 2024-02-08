@@ -176,7 +176,9 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
         } else {
             startActivity(new Intent(this, MainActivity.class));
         }
-
+        if (getIntent().getBooleanExtra("EXIT", false)){
+            finish();
+        }
     }
 
     private void loadProfileImageFromFirebaseStorage() {

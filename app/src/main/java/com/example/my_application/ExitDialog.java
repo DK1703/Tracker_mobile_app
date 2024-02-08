@@ -28,7 +28,7 @@ public class ExitDialog extends AppCompatDialogFragment {
         yes_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent fromMenutoExit = new Intent(getActivity(), MainActivity.class);
+                Intent fromMenutoExit = new Intent(getActivity(), MenuActivity.class);
                 fromMenutoExit.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 fromMenutoExit.putExtra("EXIT", true);
                 startActivity(fromMenutoExit);

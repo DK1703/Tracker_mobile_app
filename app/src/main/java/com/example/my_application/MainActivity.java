@@ -85,9 +85,6 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        if (getIntent().getBooleanExtra("EXIT", false)){
-            finish();
-        }
     }
 
     private void showLanguageDialog() {
