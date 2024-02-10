@@ -33,7 +33,7 @@
 
     <TextView
         android:id="@+id/current_time"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/current_time"
         android:textSize="18sp"
@@ -44,19 +44,38 @@
 
     <TextView
         android:id="@+id/clockTextView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/current_time"
+        android:layout_toEndOf="@+id/current_time"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/timer"
+        android:textSize="18sp"
         android:layout_below="@+id/current_time"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="25dp"
-        android:textSize="18sp" />
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="25dp"/>
+
+    <NumberPicker
+        android:id="@+id/minutePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@+id/clockTextView"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp"
+        android:layout_toEndOf="@+id/timer"
+        android:background="@drawable/custom_language_button" />
 
     <EditText
         android:id="@+id/activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/clockTextView"
+        android:layout_below="@+id/minutePicker"
         android:layout_marginStart="25dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="25dp"
@@ -80,16 +99,16 @@
         android:autofillHints=""
         android:inputType="text"/>
 
-    <Button
-        android:id="@+id/btn_voice_for_description"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:padding="6dp"
-        android:background="@drawable/custom_voice_button"
-        android:layout_alignTop="@+id/description"
-        android:drawableStart="@drawable/microphone"
-        android:backgroundTint="@color/white"
-        android:layout_alignParentEnd="true"/>
+<!--    <Button-->
+<!--        android:id="@+id/btn_voice_for_description"-->
+<!--        android:layout_width="44dp"-->
+<!--        android:layout_height="44dp"-->
+<!--        android:padding="6dp"-->
+<!--        android:background="@drawable/custom_voice_button"-->
+<!--        android:layout_alignTop="@+id/description"-->
+<!--        android:drawableStart="@drawable/microphone"-->
+<!--        android:backgroundTint="@color/white"-->
+<!--        android:layout_alignParentEnd="true"/>-->
 
     <TextView
         android:id="@+id/text_of_entries"

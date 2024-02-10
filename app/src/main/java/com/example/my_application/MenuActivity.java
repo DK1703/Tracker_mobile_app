@@ -1,5 +1,7 @@
 package com.example.my_application;
 
+import static java.security.AccessController.getContext;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -58,126 +60,137 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.menu);
-        setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                super.onDrawerSlide(drawerView, slideOffset);
-            }
-
-        };
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener((NavigationView.OnNavigationItemSelectedListener) this);
-
-        View headerView = navigationView.getHeaderView(0);
         FirebaseUser user_for_name = FirebaseAuth.getInstance().getCurrentUser();
-        String userId_for_name = user_for_name.getUid();
-        DatabaseReference databaseReference_for_name = FirebaseDatabase.getInstance().getReference("Users").child(userId_for_name).child("Name");
-        databaseReference_for_name.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String userName = dataSnapshot.getValue(String.class);
-                    // Теперь у вас есть значение поля "Name", которое вы можете установить в TextView
-                    TextView userNameTextView = headerView.findViewById(R.id.user_profile_name);
-                    userNameTextView.setText(userName);
+        if (user_for_name != null) {
+
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            toolbar.setTitle(R.string.menu);
+            setSupportActionBar(toolbar);
+
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+                @Override
+                public void onDrawerSlide(View drawerView, float slideOffset) {
+                    super.onDrawerSlide(drawerView, slideOffset);
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Обработка ошибки, если не удается получить данные
-                Log.e("Firebase", "Failed to get user name.", databaseError.toException());
-            }
-        });
-        profileImageView = headerView.findViewById(R.id.user_profile_image);
+            };
+            drawer.addDrawerListener(toggle);
+            toggle.syncState();
 
-        loadProfileImageFromFirebaseStorage();
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener((NavigationView.OnNavigationItemSelectedListener) this);
+
+            View headerView = navigationView.getHeaderView(0);
+
+            String userId_for_name = user_for_name.getUid();
+            DatabaseReference databaseReference_for_name = FirebaseDatabase.getInstance().getReference("Users").child(userId_for_name).child("Name");
+            databaseReference_for_name.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        String userName = dataSnapshot.getValue(String.class);
+                        // Теперь у вас есть значение поля "Name", которое вы можете установить в TextView
+                        TextView userNameTextView = headerView.findViewById(R.id.user_profile_name);
+                        userNameTextView.setText(userName);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Обработка ошибки, если не удается получить данные
+                    Log.e("Firebase", "Failed to get user name.", databaseError.toException());
+                }
+            });
+            profileImageView = headerView.findViewById(R.id.user_profile_image);
+
+            loadProfileImageFromFirebaseStorage();
 
 //        setDailyNotification();
 
-        Button return_btn= findViewById(R.id.return_btn);
-        return_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MenuActivity.this, MainActivity.class));
-            }
-        });
-
-        ImageButton exit_btn = findViewById(R.id.exit_btn);
-        exit_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showExitDialog();
-            }
-        });
-
-        Button rating_btn = findViewById(R.id.rating_btn);
-        rating_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAddDialog(savedEntriesCounter);
-                savedEntriesCounter--;
-            }
-        });
-
-        TiredImageView tiredImageView = findViewById(R.id.tiredImageView);
-        int userSelectedFatigueLevel = 0;
-        tiredImageView.setFatigueLevel(userSelectedFatigueLevel);
-        TextView fatigueValueTextView = findViewById(R.id.fatigueValueTextView);
-
-        SeekBar fatigueSeekBar = findViewById(R.id.fatigueSeekBar);
-        fatigueSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tiredImageView.setFatigueLevel(progress);
-                int invertedProgress = seekBar.getMax() - progress;
-                fatigueValueTextView.setText(String.valueOf(invertedProgress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null){
-            String userId = user.getUid();
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("entries");
-            databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            Button return_btn = findViewById(R.id.return_btn);
+            return_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        num_of_Entries_counter = (int) (10 - snapshot.getChildrenCount());
-                    }
-                    else {
-                        num_of_Entries_counter = 10;
-                    }
-                    TextView count_text = findViewById(R.id.num_of_entries);
-                    count_text.setText(String.valueOf(num_of_Entries_counter));
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
+                public void onClick(View v) {
+                    startActivity(new Intent(MenuActivity.this, MainActivity.class));
                 }
             });
+
+            ImageButton exit_btn = findViewById(R.id.exit_btn);
+            exit_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showExitDialog();
+                }
+            });
+
+            Button rating_btn = findViewById(R.id.rating_btn);
+            rating_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (savedEntriesCounter > 0) {
+                        showAddDialog(savedEntriesCounter);
+                        savedEntriesCounter--;
+                    } else {
+                        checkAccountStatus();
+                    }
+                }
+            });
+
+            TiredImageView tiredImageView = findViewById(R.id.tiredImageView);
+            int userSelectedFatigueLevel = 0;
+            tiredImageView.setFatigueLevel(userSelectedFatigueLevel);
+            TextView fatigueValueTextView = findViewById(R.id.fatigueValueTextView);
+
+            SeekBar fatigueSeekBar = findViewById(R.id.fatigueSeekBar);
+            fatigueSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    tiredImageView.setFatigueLevel(progress);
+                    int invertedProgress = seekBar.getMax() - progress;
+                    fatigueValueTextView.setText(String.valueOf(invertedProgress));
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(userId).child("entries");
+                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            num_of_Entries_counter = (int) (10 - snapshot.getChildrenCount());
+                        } else {
+                            num_of_Entries_counter = 10;
+                        }
+                        TextView count_text = findViewById(R.id.num_of_entries);
+                        count_text.setText(String.valueOf(num_of_Entries_counter));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            } else {
+                startActivity(new Intent(this, MainActivity.class));
+            }
+            if (getIntent().getBooleanExtra("EXIT", false)) {
+                finish();
+            }
         } else {
-            startActivity(new Intent(this, MainActivity.class));
-        }
-        if (getIntent().getBooleanExtra("EXIT", false)){
-            finish();
+            startActivity(new Intent(MenuActivity.this, MainActivity.class));
         }
     }
 
@@ -244,6 +257,8 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(MenuActivity.this, SettingsActivity.class);
             startActivityForResult(intent, SETTINGS_REQUEST_CODE);
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        } else if (id == R.id.statistic) {
+
         }
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.closeDrawer(GravityCompat.START);

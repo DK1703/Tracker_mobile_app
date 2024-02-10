@@ -52,4 +52,6 @@
     <string name="rename_profile">Изменить имя</string>
     <string name="change_photo">Поменять фото</string>
     <string name="enter_new_name">Введите новое имя</string>
+    <string name="statistic">Статистика</string>
+    <string name="timer">Таймер</string>
 </resources>

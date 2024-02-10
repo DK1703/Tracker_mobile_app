@@ -51,4 +51,6 @@
     <string name="rename_profile">Rename a profile</string>
     <string name="change_photo">Change a photo</string>
     <string name="enter_new_name">Enter new name</string>
+    <string name="statistic">Statistic</string>
+    <string name="timer">Timer</string>
 </resources>

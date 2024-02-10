@@ -1,16 +1,30 @@
 package com.example.my_application;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Messenger;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -21,6 +35,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +43,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -48,24 +66,34 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class AddDialog extends AppCompatDialogFragment {
     private OnCounterUpdateListener onCounterUpdateListener;
+
     public void setOnCounterUpdateListener(OnCounterUpdateListener listener) {
         this.onCounterUpdateListener = listener;
     }
-    private SpeechRecognizer speechRecognizer;
-    private Intent speechRecognizerIntent;
+
     private TextView clockTextView;
+    private CountDownTimer countDownTimer;
+
     private final Handler handler = new Handler();
     private EditText activ_text;
+    static final int NOTIFICATION_ID = 1; // Идентификатор уведомления
+    private static final int NOTIFICATION_ID_NEW = 2; // Идентификатор для нового уведомления
+    private static final int NOTIFICATION_ID_RETURN_TO_APP = 3;
+    static final String LOW_PRIORITY_CHANNEL_ID = "low_priority_channel";
+
+
     private EditText descr_text;
     private int num_of_Entries_counter;
+
+    private NumberPicker minutePicker;
 
     public void setCurrentCounterValue(int currentCounterValue) {
         this.num_of_Entries_counter = currentCounterValue;
     }
-    private Button voiceButtonForDescription;
 
     @NonNull
     @Override
@@ -83,8 +111,7 @@ public class AddDialog extends AppCompatDialogFragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     num_of_Entries_counter = (int) (10 - snapshot.getChildrenCount());
-                }
-                else {
+                } else {
                     num_of_Entries_counter = 10;
                 }
                 TextView num_of_Entries = view.findViewById(R.id.num_of_entries);
@@ -92,72 +119,23 @@ public class AddDialog extends AppCompatDialogFragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getActivity());
-        speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-// Установите слушатель для обработки результатов распознавания речи
-        speechRecognizer.setRecognitionListener(new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-                // Вызывается, когда приложение готово к началу записи речи
-            }
 
-            @Override
-            public void onBeginningOfSpeech() {
-                // Вызывается в начале записи речи
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-                // Вызывается, когда уровень аудиосигнала изменился
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-                // Вызывается при получении звукового буфера
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-                // Вызывается в конце записи речи
-            }
-
-            @Override
-            public void onError(int error) {
-                // Вызывается при возникновении ошибки распознавания речи
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-                // Вызывается при получении результатов распознавания речи
-                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                if (matches != null && !matches.isEmpty()) {
-                    // Обновите поле описания с распознанным текстом
-                    String recognizedText = matches.get(0);
-                    descr_text.setText(recognizedText);
-                }
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-                // Вызывается при получении частичных результатов распознавания речи
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-                // Вызывается при получении события распознавания речи
-            }
+        minutePicker = view.findViewById(R.id.minutePicker);
+// Устанавливаем минимальное и максимальное значение для таймера (например, от 1 до 140 минут)
+        minutePicker.setMinValue(1);
+        minutePicker.setMaxValue(140);
+// Устанавливаем слушатель для обработки изменений времени в таймере
+        minutePicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            // Ваш код для обработки изменений в таймере
         });
 
         clockTextView = view.findViewById(R.id.clockTextView);
         activ_text = view.findViewById(R.id.activity);
         descr_text = view.findViewById(R.id.description);
-
-//        TextView num_of_Entries = view.findViewById(R.id.num_of_entries);
-//        num_of_Entries.setText(String.valueOf(num_of_Entries_counter));
 
 
         // Запуск обновления времени каждую секунду
@@ -167,6 +145,7 @@ public class AddDialog extends AppCompatDialogFragment {
         saveEntryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startTimerAndShowNotification();
                 onSaveClicked();
                 dismiss(); // Закрываем диалог после сохранения
             }
@@ -180,17 +159,46 @@ public class AddDialog extends AppCompatDialogFragment {
             }
         });
 
-        voiceButtonForDescription = view.findViewById(R.id.btn_voice_for_description);
-        voiceButtonForDescription.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                speechRecognizer.startListening(speechRecognizerIntent);
-            }
-        });
-
         addWindow.setView(view);
 
         return addWindow.create();
+    }
+
+    private void startTimerAndShowNotification() {
+        // Получение значения из NumberPicker
+        int selectedMinutes = minutePicker.getValue();
+
+        // Создание интента для запуска сервиса
+        Activity activity = getActivity();
+        if (activity != null) {
+            // Контекст активности доступен, можно запускать сервис
+            Intent serviceIntent = new Intent(activity, TimerService.class);
+            serviceIntent.putExtra("selectedMinutes", selectedMinutes);
+            activity.startService(serviceIntent);
+            Log.d("AddDialog", "Activity context is not null");
+        } else {
+            // Контекст активности не доступен
+            Log.e("AddDialog", "Activity context is null");
+        }
+
+        // Создание интента для запуска приложения при нажатии на уведомление
+        Intent intent = new Intent(getActivity(), MenuActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Создание уведомления
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), "channel_id")
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle("Таймер")
+                .setContentText("Время таймера: " + selectedMinutes + " минут")
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true); // Уведомление закроется после нажатия на него
+
+        // Отображение уведомления
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        notificationManager.notify(123, builder.build());
     }
 
     private Runnable updateTimeRunnable = new Runnable() {
