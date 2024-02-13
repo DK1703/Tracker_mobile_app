@@ -44,19 +44,23 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
     }
 
     public static class HistoryViewHolder extends RecyclerView.ViewHolder {
-        final private TextView timeTextView;
+        final private TextView dateTextView;
+
+        final private TextView timerTextView;
         final private TextView activityTextView;
         final private TextView descriptionTextView;
 
         public HistoryViewHolder(@NonNull View itemView) {
             super(itemView);
-            timeTextView = itemView.findViewById(R.id.timeTextView);
+            dateTextView = itemView.findViewById(R.id.dateTextView);
+            timerTextView = itemView.findViewById(R.id.timerTextView);
             activityTextView = itemView.findViewById(R.id.activityTextView);
             descriptionTextView = itemView.findViewById(R.id.descriptionTextView);
         }
 
         public void bind(UserData userData) {
-            timeTextView.setText(userData.getTime());
+            dateTextView.setText(userData.getTime());
+            timerTextView.setText(userData.getTimer());
             activityTextView.setText(userData.getActivity());
             descriptionTextView.setText(userData.getDescription());
         }

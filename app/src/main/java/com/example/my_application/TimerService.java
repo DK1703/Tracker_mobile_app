@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
@@ -74,6 +75,10 @@ public class TimerService extends Service {
                             .setContentText("Прошло времени: " + getElapsedTimeFormatted())
                             .setAutoCancel(true);
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+                    SharedPreferences prefs = getSharedPreferences("timer_prefs", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("timer_running", false); // Здесь нужно установить false, когда таймер завершается или отменяется
+                    editor.apply();
                 }
             }.start();
     }
@@ -112,6 +117,10 @@ public class TimerService extends Service {
         if (countDownTimer != null) {
             countDownTimer.cancel();
             Log.d("TimerService", "Stopping timer");
+            SharedPreferences prefs = getSharedPreferences("timer_prefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("timer_running", false); // Здесь нужно установить false, когда таймер завершается или отменяется
+            editor.apply();
         }
     }
 
@@ -136,6 +145,3 @@ public class TimerService extends Service {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 }
-
-
-

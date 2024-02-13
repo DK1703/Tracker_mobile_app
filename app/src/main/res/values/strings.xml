@@ -22,6 +22,7 @@
     <string name="time">Time: </string>
     <string name="activity">Activity</string>
     <string name="description">Description</string>
+    <string name="date_hist">Date:</string>
     <string name="activity_hist">Activity: </string>
     <string name="description_hist">Description: </string>
     <string name="select_language">Select language</string>

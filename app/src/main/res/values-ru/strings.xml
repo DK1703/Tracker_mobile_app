@@ -23,6 +23,7 @@
     <string name="time">Время: </string>
     <string name="activity">Деятельность</string>
     <string name="description">Комментарий</string>
+    <string name="date_hist">Date:</string>
     <string name="activity_hist">Деятельность: </string>
     <string name="description_hist">Комментарий: </string>
     <string name="select_language">Выбрать язык</string>

@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -76,15 +77,10 @@ public class AddDialog extends AppCompatDialogFragment {
     }
 
     private TextView clockTextView;
-    private CountDownTimer countDownTimer;
 
     private final Handler handler = new Handler();
     private EditText activ_text;
     static final int NOTIFICATION_ID = 1; // Идентификатор уведомления
-    private static final int NOTIFICATION_ID_NEW = 2; // Идентификатор для нового уведомления
-    private static final int NOTIFICATION_ID_RETURN_TO_APP = 3;
-    static final String LOW_PRIORITY_CHANNEL_ID = "low_priority_channel";
-
 
     private EditText descr_text;
     private int num_of_Entries_counter;
@@ -125,13 +121,9 @@ public class AddDialog extends AppCompatDialogFragment {
 
 
         minutePicker = view.findViewById(R.id.minutePicker);
-// Устанавливаем минимальное и максимальное значение для таймера (например, от 1 до 140 минут)
+    // Устанавливаем минимальное и максимальное значение для таймера (например, от 1 до 140 минут)
         minutePicker.setMinValue(1);
         minutePicker.setMaxValue(140);
-// Устанавливаем слушатель для обработки изменений времени в таймере
-        minutePicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
-            // Ваш код для обработки изменений в таймере
-        });
 
         clockTextView = view.findViewById(R.id.clockTextView);
         activ_text = view.findViewById(R.id.activity);
@@ -147,7 +139,6 @@ public class AddDialog extends AppCompatDialogFragment {
             public void onClick(View v) {
                 startTimerAndShowNotification();
                 onSaveClicked();
-                dismiss(); // Закрываем диалог после сохранения
             }
         });
 
@@ -165,40 +156,50 @@ public class AddDialog extends AppCompatDialogFragment {
     }
 
     private void startTimerAndShowNotification() {
-        // Получение значения из NumberPicker
-        int selectedMinutes = minutePicker.getValue();
 
-        // Создание интента для запуска сервиса
-        Activity activity = getActivity();
-        if (activity != null) {
-            // Контекст активности доступен, можно запускать сервис
-            Intent serviceIntent = new Intent(activity, TimerService.class);
-            serviceIntent.putExtra("selectedMinutes", selectedMinutes);
-            activity.startService(serviceIntent);
-            Log.d("AddDialog", "Activity context is not null");
+        String activity_text = activ_text.getText().toString();
+        if (!activity_text.isEmpty()) {
+            // Получение значения из NumberPicker
+            int selectedMinutes = minutePicker.getValue();
+
+            // Создание интента для запуска сервиса
+            Activity activity = getActivity();
+            if (activity != null) {
+                // Контекст активности доступен, можно запускать сервис
+                Intent serviceIntent = new Intent(activity, TimerService.class);
+                serviceIntent.putExtra("selectedMinutes", selectedMinutes);
+                activity.startService(serviceIntent);
+                Log.d("AddDialog", "Activity context is not null");
+            } else {
+                // Контекст активности не доступен
+                Log.e("AddDialog", "Activity context is null");
+            }
+
+            // Создание интента для запуска приложения при нажатии на уведомление
+            Intent intent = new Intent(getActivity(), MenuActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // Создание уведомления
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), "channel_id")
+                    .setSmallIcon(R.drawable.ic_launcher)
+                    .setContentTitle("Таймер")
+                    .setContentText("Время таймера: " + selectedMinutes + " минут")
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true); // Уведомление закроется после нажатия на него
+
+            // Отображение уведомления
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
+            if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            notificationManager.notify(123, builder.build());
+            SharedPreferences prefs = getActivity().getSharedPreferences("timer_prefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("timer_running", true); // Здесь нужно установить true, когда таймер запускается
+            editor.apply();
         } else {
-            // Контекст активности не доступен
-            Log.e("AddDialog", "Activity context is null");
+            Toast.makeText(getActivity(), "Заполните поле активности", Toast.LENGTH_SHORT).show();
         }
-
-        // Создание интента для запуска приложения при нажатии на уведомление
-        Intent intent = new Intent(getActivity(), MenuActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Создание уведомления
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), "channel_id")
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle("Таймер")
-                .setContentText("Время таймера: " + selectedMinutes + " минут")
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true); // Уведомление закроется после нажатия на него
-
-        // Отображение уведомления
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getActivity());
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        notificationManager.notify(123, builder.build());
     }
 
     private Runnable updateTimeRunnable = new Runnable() {
@@ -221,11 +222,12 @@ public class AddDialog extends AppCompatDialogFragment {
         // Получаем данные из диалогового окна, которые нужно сохранить
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
         String currentTime = sdf.format(new Date());
+        String timer = String.valueOf(minutePicker.getValue());
         String activity = activ_text.getText().toString();
         String description = descr_text.getText().toString();
 
-        if (num_of_Entries_counter > 0) {
-            UserData userData = new UserData(currentTime, activity, description);
+        if (num_of_Entries_counter > 0  && !activity.isEmpty()) {
+            UserData userData = new UserData(currentTime, timer, activity, description);
 
             // Получаем текущего пользователя
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -251,6 +253,8 @@ public class AddDialog extends AppCompatDialogFragment {
             updateRemainingEntriesCounter();
 
             dismiss();
+        } else if (activity.isEmpty()) {
+            Toast.makeText(getActivity(), "Заполните поле активности", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getActivity(), "Купи подписку и будет неограниченное количество записей!!", Toast.LENGTH_SHORT).show();
         }

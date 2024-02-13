@@ -13,10 +13,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -31,6 +34,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
@@ -45,7 +53,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -54,6 +66,8 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
     private int savedEntriesCounter = 10, num_of_Entries_counter;
     private static final int SETTINGS_REQUEST_CODE = 1001;
     private CircleImageView profileImageView;
+
+    private List<UserData> userDataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,15 +139,22 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
 
+            SharedPreferences prefs = getSharedPreferences("timer_prefs", Context.MODE_PRIVATE);
+            boolean timerRunning = prefs.getBoolean("timer_running", false);
             Button rating_btn = findViewById(R.id.rating_btn);
+            rating_btn.setEnabled(!timerRunning);
             rating_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (savedEntriesCounter > 0) {
+                    SharedPreferences prefs = getSharedPreferences("timer_prefs", Context.MODE_PRIVATE);
+                    boolean timerRunning = prefs.getBoolean("timer_running", false);
+                    if (!timerRunning && savedEntriesCounter > 0) {
                         showAddDialog(savedEntriesCounter);
                         savedEntriesCounter--;
+                    } else if (savedEntriesCounter <= 0){
+                        Toast.makeText(getApplicationContext(), "Get a sub for unlimited entries!!!", Toast.LENGTH_SHORT).show();
                     } else {
-                        checkAccountStatus();
+                        Toast.makeText(getApplicationContext(), "You get a current activity!!!", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -170,6 +191,11 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
+                            userDataList = new ArrayList<>();
+                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                UserData userData = dataSnapshot.getValue(UserData.class);
+                                userDataList.add(userData);
+                            }
                             num_of_Entries_counter = (int) (10 - snapshot.getChildrenCount());
                         } else {
                             num_of_Entries_counter = 10;
@@ -258,8 +284,59 @@ public class MenuActivity extends AppCompatActivity implements NavigationView.On
             startActivityForResult(intent, SETTINGS_REQUEST_CODE);
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         } else if (id == R.id.statistic) {
+            if (userDataList != null) { // Проверяем, что userDataList не равен null
+                Dialog dialog = new Dialog(MenuActivity.this);
+                dialog.setContentView(R.layout.pie_chart);
+                dialog.setCancelable(true);
 
+                PieChart pieChart = dialog.findViewById(R.id.pieChart);
+
+                // Подготавливаем данные для диаграммы
+                ArrayList<PieEntry> entries = new ArrayList<>();
+                Map<String, Integer> activityTimers = new HashMap<>();
+
+                for (UserData userData : userDataList) {
+                    String activity = userData.getActivity();
+                    int timerInSeconds = Integer.parseInt(userData.getTimer());
+
+                    if (activityTimers.containsKey(activity)) {
+                        int currentTimer = activityTimers.get(activity);
+                        activityTimers.put(activity, currentTimer + timerInSeconds);
+                    } else {
+                        activityTimers.put(activity, timerInSeconds);
+                    }
+                }
+
+                for (Map.Entry<String, Integer> entry : activityTimers.entrySet()) {
+                    entries.add(new PieEntry(entry.getValue(), entry.getKey()));
+                }
+
+                // Создаем набор данных и настраиваем его
+                PieDataSet dataSet = new PieDataSet(entries, "Activity Time");
+                dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+                PieData data = new PieData(dataSet);
+                data.setValueTextSize(18f);
+                pieChart.setData(data);
+
+                // Настройка диаграммы
+//                pieChart.setUsePercentValues(true);
+                pieChart.setEntryLabelColor(Color.BLACK);
+                pieChart.setEntryLabelTextSize(20f);
+                pieChart.setEntryLabelTypeface(Typeface.DEFAULT_BOLD); // Применение жирного стиля к меткам значений
+                pieChart.getDescription().setEnabled(false);
+
+                // Обновление диаграммы
+                pieChart.invalidate();
+
+                dialog.getWindow().setLayout(1000, 1300);
+
+                // Показываем диалоговое окно с круговой диаграммой
+                dialog.show();
+            } else {
+                Log.e("MenuActivity", "userDataList is null");
+            }
         }
+
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.closeDrawer(GravityCompat.START);
         return false;

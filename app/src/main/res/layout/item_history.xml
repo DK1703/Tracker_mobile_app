@@ -13,23 +13,39 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/time"
+            android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/date_hist" />
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/date"
+            android:layout_alignTop="@+id/date"/>
+
+        <TextView
+            android:id="@+id/timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/date"
+            android:layout_marginTop="8dp"
             android:text="@string/time" />
 
         <TextView
-            android:id="@+id/timeTextView"
+            android:id="@+id/timerTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@+id/time"
-            android:layout_alignTop="@+id/time"/>
+            android:layout_below="@+id/dateTextView"
+            android:layout_toEndOf="@+id/timer"
+            android:layout_alignTop="@+id/timer"/>
 
         <TextView
             android:id="@+id/activity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/time"
+            android:layout_below="@id/timer"
             android:layout_marginTop="8dp"
             android:text="@string/activity_hist" />
 
@@ -37,7 +53,7 @@
             android:id="@+id/activityTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/timeTextView"
+            android:layout_below="@id/timerTextView"
             android:layout_toEndOf="@+id/activity"
             android:layout_alignTop="@+id/activity"/>
 
